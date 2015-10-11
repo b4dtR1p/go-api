@@ -19,19 +19,19 @@ var routes = Routes{
         Index,
     },
     Route{
-        "TodoIndex",
+        "ItemIndex",
         "GET",
         "/api/items",
         ItemIndex,
     },
     Route{
-        "TodoCreate",
+        "ItemCreate",
         "POST",
         "/api/items",
         ItemCreate,
     },
     Route{
-        "TodoShow",
+        "ItemShow",
         "GET",
         "/api/items/{itemId}",
         ItemShow,
