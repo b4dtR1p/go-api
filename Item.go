@@ -3,7 +3,7 @@ package main
 import "time"
 
 type Item struct {
-	Id		  	int					`json:"_id"`
+	Id		  	int					`json:"id"`
 	Picture	  	string				`json:"picture"`
     Name      	string    			`json:"name"`
     Description string				`json:"description"`
