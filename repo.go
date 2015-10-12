@@ -2,7 +2,19 @@ package main
 
 import "fmt"
 
-func RepoFindItem(id uint64) *Item {
+type Repo struct {
+	database *Database
+}
+
+func NewRepo() *Repo {
+	d, err := NewDatabase("restapi.db")
+	if err != nil {
+		panic(err)
+	}
+	return &Repo{d}
+}
+
+func (r *Repo) RepoFindItem(id uint64) *Item {
 	for _, t := range items {
 		if t.Id == id {
 			return t
@@ -12,14 +24,14 @@ func RepoFindItem(id uint64) *Item {
 	return &Item{}
 }
 
-func RepoCreateItem(t *Item) *Item {
-	t.Id = database.NewItemId()
+func (r *Repo) RepoCreateItem(t *Item) *Item {
+	t.Id = r.database.NewItemId()
 	items = append(items, t)
-	database.SaveItem(t)
+	r.database.SaveItem(t)
 	return t
 }
 
-func RepoDestroyItem(id uint64) error {
+func (r *Repo) RepoDestroyItem(id uint64) error {
 	for i, t := range items {
 		if t.Id == id {
 			items = append(items[:i], items[i+1:]...)
