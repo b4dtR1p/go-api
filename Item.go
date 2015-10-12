@@ -3,13 +3,13 @@ package main
 import "time"
 
 type Item struct {
-	Id		  	int					`json:"id"`
-	Picture	  	string				`json:"picture"`
-    Name      	string    			`json:"name"`
-    Description string				`json:"description"`
-    Price		string				`json:"price"`
-    Completed 	bool      			`json:"completed"`
-    Created    	time.Time 			`json:"created"`
+	Id          uint64    `json:"id"`
+	Picture     string    `json:"picture"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Price       string    `json:"price"`
+	Completed   bool      `json:"completed"`
+	Created     time.Time `json:"created"`
 }
 
-type Items []Item
+type Items []*Item
