@@ -9,7 +9,7 @@ type Item struct {
     Description string				`json:"description"`
     Price		string				`json:"price"`
     Completed 	bool      			`json:"completed"`
-    Date      	time.Time 			`json:"date"`
+    Created    	time.Time 			`json:"created"`
 }
 
 type Items []Item

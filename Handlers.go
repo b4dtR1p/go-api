@@ -4,51 +4,117 @@ import (
     "encoding/json"
     "fmt"
     "net/http"
-    "io"
-    "io/ioutil"
-
-    "github.com/gorilla/mux"
+    "errors"
+    "github.com/boltdb/bolt"
+    "os"
+    "path"
+    "time"
+    "strconv"
 )
+
+type Database struct {
+    // Bolt database.
+    db *bolt.DB
+}
+
+// Errors
+var (
+    ErrBucketNotFound = errors.New("bucket not found")
+)
+
+// Create and open a database.
+func NewDatabase(filename string) (*Database, error) {
+    // Open database
+    os.MkdirAll(path.Dir(filename), 0700)
+    db, err := bolt.Open(filename, 0600, &bolt.Options{Timeout: 5 * time.Second})
+    if err != nil {
+        return nil, err
+    }
+    d := &Database{db}
+
+    // Return
+    return d, nil
+}
+
+// Close database
+func (db *Database) Close() {
+    db.db.Close()
+    db.db = nil
+}
 
 func Index(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintln(w, "Welcome to my go api!")
 }
 
-func ItemIndex(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusOK)
-    if err := json.NewEncoder(w).Encode(items); err != nil {
-        panic(err)
-    }
-}
-
-func ItemCreate(w http.ResponseWriter, r *http.Request) {
-    var item Item
-    body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-    if err != nil {
-        panic(err)
-    }
-    if err := r.Body.Close(); err != nil {
-        panic(err)
-    }
-    if err := json.Unmarshal(body, &item); err != nil {
-        w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-        w.WriteHeader(422) // unprocessable entity
-        if err := json.NewEncoder(w).Encode(err); err != nil {
+func NewItemId() uint64 {
+    var id uint64
+ 
+    err := db.db.Update(func(tx *bolt.Tx) error {
+        bucket, err := tx.CreateBucketIfNotExists([]byte("item"))
+        if err != nil {
+            return err
+        }
+ 
+        id, err = bucket.NextSequence()
+            return err
+        })
+ 
+        if err != nil {
             panic(err)
         }
-    }
-
-    t := RepoCreateItem(item)
-    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusCreated)
-    if err := json.NewEncoder(w).Encode(t); err != nil {
-        panic(err)
-    }
+ 
+        return id
 }
-
-func ItemShow(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    itemId := vars["itemId"]
-    fmt.Fprintln(w, "Item show:", itemId)
+ 
+func SaveItem(item *Item) error {
+    encoded, err := json.Marshal(item)
+    if err != nil {
+        return err
+    }
+ 
+    return db.db.Update(func(tx *bolt.Tx) error {
+        bucket, err := tx.CreateBucketIfNotExists([]byte("item"))
+        if err != nil {
+            return err
+        }
+ 
+        id := strconv.FormatUint(item.Id, 10)
+        err = bucket.Put([]byte(id), encoded)
+        if err != nil {
+            return err
+        }
+ 
+        return nil
+    })
+}
+ 
+func Items() []*Item {
+    var list []*Item
+    db.db.View(func(tx *bolt.Tx) error {
+        bucket := tx.Bucket([]byte("item"))
+        if bucket == nil {
+            return nil
+        }
+ 
+        bucket.ForEach(func(k, v []byte) error {
+            item := &Item{}
+            json.Unmarshal(v, &item)
+            list = append(list, item)
+            return nil
+        })
+        return nil
+    })
+    return list
+}
+ 
+func RemoveItem(item *Item) error {
+    return db.db.Update(func(tx *bolt.Tx) error {
+        bucket := tx.Bucket([]byte("item"))
+        if bucket == nil {
+            return nil
+        }
+ 
+        id := strconv.FormatUint(item.Id, 10)
+        return bucket.Delete([]byte(id))
+    })
 }
