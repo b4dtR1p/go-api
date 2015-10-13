@@ -24,7 +24,13 @@ func (repo *Repo) ItemIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repo) ItemCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to my go api!")
+	item := &Item{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&item); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	repo.database.SaveItem(item)
 }
 
 func (repo *Repo) ItemShow(w http.ResponseWriter, r *http.Request) {
