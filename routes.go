@@ -14,46 +14,41 @@ type Route struct {
 
 type Routes []Route
 
-var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/api",
-		Index,
-	},
-	Route{
-		"ItemIndex",
-		"GET",
-		"/api/items",
-		ItemIndex,
-	},
-	Route{
-		"ItemCreate",
-		"POST",
-		"/api/items",
-		ItemCreate,
-	},
-	Route{
-		"ItemShow",
-		"GET",
-		"/api/items/{itemId}",
-		ItemShow,
-	},
-}
+func NewRouter(repo *Repo) *mux.Router {
+	routes := Routes{
+		Route{
+			"Index",
+			"GET",
+			"/api",
+			repo.Index,
+		},
+		Route{
+			"ItemIndex",
+			"GET",
+			"/api/items",
+			repo.ItemIndex,
+		},
+		Route{
+			"ItemCreate",
+			"POST",
+			"/api/items",
+			repo.ItemCreate,
+		},
+		Route{
+			"ItemShow",
+			"GET",
+			"/api/item/{id:[0-9]+}",
+			repo.ItemShow,
+		},
+	}
 
-func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
-
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
-
+			HandlerFunc(route.HandlerFunc).
+			Name(route.Name)
 	}
 	return router
 }
