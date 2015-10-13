@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/boltdb/bolt"
@@ -80,6 +81,26 @@ func (db *Database) SaveItem(item *Item) error {
 
 		return nil
 	})
+}
+
+func (db *Database) Item(id uint64) *Item {
+	var item *Item = nil
+	db.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("item"))
+		if bucket == nil {
+			return nil
+		}
+
+		sid := strconv.FormatUint(id, 10)
+
+		c := bucket.Cursor()
+		for k, v := c.Seek([]byte(sid)); bytes.Equal(k, []byte(sid)); k, v = c.Next() {
+			json.Unmarshal(v, &item)
+			return nil
+		}
+		return nil
+	})
+	return item
 }
 
 func (db *Database) Items() []*Item {

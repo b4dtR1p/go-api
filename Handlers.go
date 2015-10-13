@@ -1,22 +1,51 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
-func Index(w http.ResponseWriter, r *http.Request) {
+func (repo *Repo) Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to my go api!")
 }
 
-func ItemIndex(w http.ResponseWriter, r *http.Request) {
+func (repo *Repo) ItemIndex(w http.ResponseWriter, r *http.Request) {
+	items := repo.database.Items()
+	js, err := json.Marshal(items)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
+func (repo *Repo) ItemCreate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to my go api!")
 }
 
-func ItemCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to my go api!")
-}
+func (repo *Repo) ItemShow(w http.ResponseWriter, r *http.Request) {
+	sid := mux.Vars(r)["id"]
+	id, err := strconv.ParseUint(sid, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-func ItemShow(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to my go api!")
+	item := repo.database.Item(id)
+	if item == nil {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
+	js, err := json.Marshal(item)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
