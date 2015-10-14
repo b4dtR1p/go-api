@@ -30,13 +30,6 @@ func (repo *Repo) ItemCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-    js, err := json.Marshal(item)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
 	repo.database.SaveItem(item)
 }
 

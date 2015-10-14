@@ -7,7 +7,7 @@ type Repo struct {
 }
 
 func NewRepo() *Repo {
-	d, err := NewDatabase("restapi.db")
+	d, err := NewDatabase("go-api.db")
 	if err != nil {
 		panic(err)
 	}
