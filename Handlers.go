@@ -30,6 +30,7 @@ func (repo *Repo) ItemCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	item.Id = repo.database.NewItemId()
 	repo.database.SaveItem(item)
 }
 
