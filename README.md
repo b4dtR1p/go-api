@@ -1,4 +1,4 @@
-Simple REST Api in go.
+Simple REST Api in go && BoltDB
 
 try to install directy with `go install github.com/b4dtR1p/go-api`
 
