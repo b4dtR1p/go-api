@@ -17,6 +17,18 @@ type Routes []Route
 func NewRouter(repo *Repo) *mux.Router {
 	routes := Routes{
 		Route{
+			"Home",
+			"GET",
+			"/",
+			repo.Home,
+		},
+		Route{
+			"Item",
+			"GET",
+			"/items",
+			repo.Item,
+		},
+		Route{
 			"Index",
 			"GET",
 			"/api",

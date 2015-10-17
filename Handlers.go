@@ -6,7 +6,24 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+	"github.com/flosch/pongo2"
 )
+
+var tpl = pongo2.Must(pongo2.FromFile("home.html"))
+func (repo *Repo) Home(w http.ResponseWriter, r *http.Request) {
+	err := tpl.ExecuteWriter(pongo2.Context{"query": r.FormValue("query")}, w)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
+
+var tplItem = pongo2.Must(pongo2.FromFile("item.html"))
+func (repo *Repo) Item(w http.ResponseWriter, r *http.Request){
+	err := tpl.ExecuteWriter(pongo2.Context{"query": r.FormValue("query")}, w)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
 
 func (repo *Repo) Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to my go api!")
