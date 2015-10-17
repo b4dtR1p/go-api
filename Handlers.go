@@ -9,7 +9,7 @@ import (
 	"github.com/flosch/pongo2"
 )
 
-var tpl = pongo2.Must(pongo2.FromFile("home.html"))
+var tpl = pongo2.Must(pongo2.FromFile("views/home.html"))
 func (repo *Repo) Home(w http.ResponseWriter, r *http.Request) {
 	err := tpl.ExecuteWriter(pongo2.Context{"query": r.FormValue("query")}, w)
     if err != nil {
@@ -17,9 +17,9 @@ func (repo *Repo) Home(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-var tplItem = pongo2.Must(pongo2.FromFile("item.html"))
+var tplItem = pongo2.Must(pongo2.FromFile("views/item.html"))
 func (repo *Repo) Item(w http.ResponseWriter, r *http.Request){
-	err := tpl.ExecuteWriter(pongo2.Context{"query": r.FormValue("query")}, w)
+	err := tplItem.ExecuteWriter(pongo2.Context{"Items": r.FormValue("items")}, w)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }
